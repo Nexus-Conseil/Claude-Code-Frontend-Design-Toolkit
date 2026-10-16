@@ -1,0 +1,20 @@
+{
+  "$schema": "https://anthropic.com/claude-code/marketplace.schema.json",
+  "name": "nexus-conseil",
+  "description": "Plugins maintained by Nexus Conseil. Currently: the Frontend Design Toolkit.",
+  "owner": {
+    "name": "Nexus Conseil",
+    "email": "contact@nexus-conseil.ch",
+    "url": "https://github.com/Nexus-Conseil"
+  },
+  "plugins": [
+    {
+      "name": "frontend-design-toolkit",
+      "source": "./",
+      "description": "Design-direction, theming, polish and context-budget skills, a design-review agent, a project audit and a catalog of 40+ vetted frontend design tools for Claude Code.",
+      "version": "1.0.0",
+      "category": "development",
+      "tags": ["frontend", "design", "ui", "tailwind", "figma", "playwright"]
+    }
+  ]
+}

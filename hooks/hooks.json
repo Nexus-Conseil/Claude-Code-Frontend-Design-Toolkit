@@ -1,0 +1,17 @@
+{
+  "description": "Detects frontend projects at session start and hands Claude a one-line setup note.",
+  "hooks": {
+    "SessionStart": [
+      {
+        "matcher": "startup|clear",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "sh \"${CLAUDE_PLUGIN_ROOT}/hooks/scripts/detect-frontend.sh\"",
+            "timeout": 5
+          }
+        ]
+      }
+    ]
+  }
+}

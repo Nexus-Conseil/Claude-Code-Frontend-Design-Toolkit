@@ -1,10 +1,71 @@
 # Claude Code Frontend Design Toolkit
 
-Everything I've found that actually makes Claude Code output better-looking frontends. Skills, plugins, MCP servers, CLAUDE.md tricks, organized by what you're trying to do.
+A Claude Code plugin that makes generated frontends look designed instead of default, plus the curated catalog it grew out of: skills, plugins, MCP servers and CLAUDE.md tricks for frontend and design work, organised by what you are trying to do.
 
-`April 2026` · `70+ tools` · `10 sections`
+<!-- catalog:stats:start -->
+`Catalog 1.0.0` · `updated 2026-10-16` · `42 tools` · `9 sections` · `4 stacks`
+<!-- catalog:stats:end -->
 
-If this is useful, star it so others can find it. PRs welcome — see [Contributing](#contributing).
+Install the plugin and Claude picks a visual direction before writing UI, keeps a whole site on one set of design tokens, finishes pages with a craft → accessibility → performance loop, watches the context budget, and can audit, theme and review a project on request. The catalog is bundled, so "which tool does X?" is answered from a maintained file, not from memory.
+
+If this is useful, star it so others can find it. PRs welcome; see [Contributing](#contributing).
+
+---
+
+## Install the plugin
+
+One step on Claude Code 2.1.275 or later, from inside a session:
+
+```
+/plugin install frontend-design-toolkit --marketplace Nexus-Conseil/Claude-Code-Frontend-Design-Toolkit
+```
+
+Or from the terminal:
+
+```bash
+claude plugin marketplace add Nexus-Conseil/Claude-Code-Frontend-Design-Toolkit
+claude plugin install frontend-design-toolkit@nexus-conseil
+```
+
+Try it without installing: clone the repo and run `claude --plugin-dir ./Claude-Code-Frontend-Design-Toolkit` from any frontend project.
+
+The plugin ships **no MCP servers** of its own. Servers cost thousands of tokens per session, so they stay a per-project choice made through `/frontend-design-toolkit:install`.
+
+## What you get
+
+### Skills that activate on their own
+
+| Skill | Fires when | What it does |
+|---|---|---|
+| `design-direction` | You build or style any UI | Forces a named aesthetic direction before code, derives type, color, shape and motion from it, and checks the result against an anti-slop list (no default Inter, no purple gradient, no three identical cards) |
+| `site-theming` | Theming, tokens, dark mode, Tailwind `@theme`, "make everything match" | CLAUDE.md theme block plus an OKLCH single-hue token system with semantic light and dark palettes, per stack (Tailwind v4/v3, shadcn, vanilla) |
+| `ui-polish-loop` | A page is generated or changed, "polish", "before I ship" | The fixed sequence: baseline craft → accessibility → motion and performance → browser verification, with checklists that work even when the external polish skills are not installed |
+| `context-budget` | Adding MCP servers, sessions compacting early | Per-server token costs, the three-to-five rule, scoping and disabling, when a skill or `@playwright/cli` beats an MCP server |
+| `toolkit-catalog` | "Is there a skill for X?", "which MCP for Y?" | Answers from `catalog/catalog.json` with verbatim install commands and prerequisites |
+
+### Slash skills
+
+| Command | Does |
+|---|---|
+| `/frontend-design-toolkit:recommend [stack]` | Reads the project (framework, styling, Figma or Storybook signals, what is already configured) and recommends a stack with reasons and token cost |
+| `/frontend-design-toolkit:install <stack-or-tool-id> [--dry-run]` | Shows the exact commands from the catalog, asks once, runs them, verifies with `claude mcp list` and `claude plugin list` |
+| `/frontend-design-toolkit:catalog [section or query]` | Browse or search the catalog |
+| `/frontend-design-toolkit:theme [direction]` | Writes the CLAUDE.md theme block and, when wanted, the token file, after showing the diff |
+| `/frontend-design-toolkit:audit [--json]` | Thirteen checks (direction locked, tokens used, browser for Claude, live docs, a11y gate, context budget, …) and the shortest fix for each gap |
+| `/frontend-design-toolkit:design-review [path or 'changed']` | Forks the `design-reviewer` agent for a ranked, line-anchored review against the project's theme block |
+
+### Agents
+
+- `frontend-design-toolkit:design-reviewer`: read-only review of UI code against the theme, the slop checklist, accessibility and motion rules. Opens the page in a browser when a browser MCP is available.
+- `frontend-design-toolkit:stack-advisor`: the analysis behind `recommend`, usable from `@agent-frontend-design-toolkit:stack-advisor`.
+
+### A quiet SessionStart hook
+
+When the project's `package.json` has a UI framework or styling dependency, Claude starts the session knowing the stack ("Next.js, React; styling: Tailwind; motion: Motion"), whether `CLAUDE.md` already carries a theme block, and whether a browser MCP is configured. Non-frontend projects see nothing. Set `FDT_HOOK_DISABLED=1` to silence it.
+
+### The catalog, as data
+
+`catalog/catalog.json` holds every tool below with id, kind, author, verified install commands, prerequisites, tags and notes; `catalog/stacks.json` holds the four stacks. Both are validated in CI and the tables in this README are generated from them (`npm run render`).
 
 ---
 
@@ -12,7 +73,7 @@ If this is useful, star it so others can find it. PRs welcome — see [Contribut
 
 - [Design Skills](#design-skills) — Kill the AI slop
 - [Site-Wide Theming](#site-wide-theming--design-tokens) — Make everything match
-- [Animation & Motion](#animation--motion) — GSAP, Framer Motion, scroll effects
+- [Animation & Motion](#animation--motion) — GSAP, Motion, scroll effects
 - [UI/UX Intelligence](#uiux-intelligence) — Patterns, a11y, research
 - [Design-to-Code](#design-to-code-pipeline) — Figma pipeline
 - [Testing & Browser Automation](#testing--browser-automation) — Give Claude eyes
@@ -37,7 +98,7 @@ The one you install first. Anthropic's own skill that tells Claude to pick an ac
 | | |
 |---|---|
 | **Author** | Anthropic |
-| **Install** | `claude plugin add anthropic/frontend-design` |
+| **Install** | `claude plugin install frontend-design@claude-plugins-official` |
 | **Type** | Skill (auto-activates) |
 | **Source** | [anthropics/claude-code/.../frontend-design](https://github.com/anthropics/claude-code/tree/main/plugins/frontend-design) |
 
@@ -47,20 +108,20 @@ What changes:
 - Blocks generic component patterns and cookie-cutter layouts
 - Enforces CSS variables and cohesive color systems
 
-Install this first. Everything else on this list assumes you have it.
+Install this first. Everything else on this list assumes you have it. (`/frontend-design-toolkit:install essentials` installs it together with Context7 and Playwright.)
 
-### UI/UX Pro Max — 62.6k stars
+### UI/UX Pro Max — 136k stars
 
 240+ styles, 127 font pairings, 99 UX guidelines. Tell it "fintech dashboard" and it picks a design system that makes sense for fintech. The v2.0 reasoning engine does the style matching automatically.
 
 | | |
 |---|---|
 | **Author** | nextlevelbuilder |
-| **Install** | `claude plugin add nextlevelbuilder/ui-ux-pro-max-skill` |
-| **Type** | Skill + CLI (`uipro-cli`) |
+| **Install** | `claude plugin marketplace add nextlevelbuilder/ui-ux-pro-max-skill && claude plugin install ui-ux-pro-max@ui-ux-pro-max-skill` |
+| **Type** | Plugin + CLI (`ui-ux-pro-max-cli`) |
 | **Source** | [nextlevelbuilder/ui-ux-pro-max-skill](https://github.com/nextlevelbuilder/ui-ux-pro-max-skill) |
 
-Also works with Cursor, Windsurf, Codex, and a dozen other agents if you're not locked into Claude Code.
+Also works with Cursor, Windsurf, Codex, and a dozen other agents if you're not locked into Claude Code. CLI route: `npm install -g ui-ux-pro-max-cli && uipro init --ai claude`.
 
 ### Taste Skill
 
@@ -69,7 +130,7 @@ Tunable knobs for how wild Claude gets. You set design variance (safe to experim
 | | |
 |---|---|
 | **Author** | Leonxlnx |
-| **Install** | `claude plugin add Leonxlnx/taste-skill` |
+| **Install** | `claude plugin marketplace add Leonxlnx/taste-skill && claude plugin install taste-skill@taste-skill` |
 | **Source** | [Leonxlnx/taste-skill](https://github.com/Leonxlnx/taste-skill) |
 
 ### Frontend Design Pro Demo
@@ -79,7 +140,7 @@ Tunable knobs for how wild Claude gets. You set design variance (safe to experim
 | | |
 |---|---|
 | **Author** | ClaudeKit (faafospecialist) |
-| **Install** | `claude plugin add claudekit/frontend-design-pro-demo` |
+| **Install** | `claude plugin marketplace add claudekit/frontend-design-pro-demo && claude plugin install frontend-design-pro@frontend-design-pro` |
 | **Source** | [claudekit/frontend-design-pro-demo](https://github.com/claudekit/frontend-design-pro-demo) |
 
 | # | Aesthetic | Think... |
@@ -103,7 +164,7 @@ Two modes: **Controlled** (ship to prod — WCAG, full responsive specs, motion 
 | | |
 |---|---|
 | **Author** | bencium |
-| **Install** | `cp -r bencium-controlled-ux-designer ~/.claude/skills/` |
+| **Install** | `claude plugin marketplace add bencium/bencium-claude-code-design-skill && claude plugin install bencium-controlled-ux-designer@bencium-marketplace` |
 | **Source** | [bencium/bencium-claude-code-design-skill](https://github.com/bencium/bencium-claude-code-design-skill) |
 
 Files included: `SKILL.md`, `ACCESSIBILITY.md` (~830 lines), `RESPONSIVE-DESIGN.md` (~600 lines), `MOTION-SPEC.md`, `DESIGN-SYSTEM-TEMPLATE.md`
@@ -261,7 +322,7 @@ This is the biggest gap the rest of the list doesn't cover — actually *creatin
 | | |
 |---|---|
 | **Author** | freshtechbro |
-| **Install** | `claude plugin marketplace add freshtechbro/claudedesignskills` then install individual skills |
+| **Install** | `claude plugin marketplace add freshtechbro/claudedesignskills` then `claude plugin install core-3d-animation@claude-design-skillstack` (or individual skills such as `gsap-scrolltrigger`, `motion-framer`) |
 | **Source** | [freshtechbro/claudedesignskills](https://github.com/freshtechbro/claudedesignskills) |
 
 ### Motion Skill (jezweb)
@@ -282,6 +343,7 @@ Good for reviewing existing code, not just generating new animations.
 | | |
 |---|---|
 | **Author** | kylezantos |
+| **Install** | `npx skills add kylezantos/design-motion-principles` |
 | **Source** | [kylezantos/design-motion-principles](https://github.com/kylezantos/design-motion-principles) |
 
 ---
@@ -296,6 +358,7 @@ Good for reviewing existing code, not just generating new animations.
 
 | | |
 |---|---|
+| **Install** | `claude plugin marketplace add wondelai/skills && claude plugin install ux-design@wondelai-skills` |
 | **Source** | [wondelai/skills](https://github.com/wondelai/skills) |
 
 ### Google Design Skills (Stitch MCP)
@@ -305,6 +368,8 @@ From Google Labs. Includes: `design-md` (manage DESIGN.md files), `enhance-promp
 | | |
 |---|---|
 | **Author** | Google Labs |
+| **Install** | `npx skills add google-labs-code/stitch-skills` |
+| **Source** | [google-labs-code/stitch-skills](https://github.com/google-labs-code/stitch-skills) |
 
 ### Jeffallan Claude Skills — 66 skills
 
@@ -312,7 +377,7 @@ Full-stack skill library. The frontend-relevant ones: React Expert (Server Compo
 
 | | |
 |---|---|
-| **Install** | See [Quick Start Guide](https://jeffallan.github.io/claude-skills) |
+| **Install** | `claude plugin marketplace add jeffallan/claude-skills && claude plugin install fullstack-dev-skills@fullstack-dev-skills` |
 | **Source** | [Jeffallan/claude-skills](https://github.com/Jeffallan/claude-skills) |
 
 ### UI/UX Design Skill (Useforclaude)
@@ -336,7 +401,7 @@ Claude reads your Figma files directly. Frames, components, tokens, layout data.
 | | |
 |---|---|
 | **Author** | Figma |
-| **Install** | `claude mcp add --transport sse figma-dev-mode-mcp-server http://127.0.0.1:3845/sse` |
+| **Install** | `claude plugin install figma@claude-plugins-official` (remote, OAuth via `/mcp`) or `claude mcp add --transport http figma-desktop http://127.0.0.1:3845/mcp` (desktop app; the old `/sse` endpoint is deprecated) |
 | **Requires** | Figma desktop app, Dev or Full seat |
 | **Docs** | [figma.com/developers/mcp](https://www.figma.com/developers/mcp) |
 
@@ -393,6 +458,7 @@ The standard. 25+ tools for browser control via accessibility tree snapshots (2-
 |---|---|
 | **Author** | Microsoft |
 | **Install** | `claude mcp add playwright -s user -- npx @playwright/mcp@latest` |
+| **Lighter** | `npm i -g @playwright/cli@latest && playwright-cli install --skills` (roughly a quarter of the tokens) |
 | **Source** | [microsoft/playwright-mcp](https://github.com/microsoft/playwright-mcp) |
 
 2026 updates worth knowing:
@@ -408,8 +474,9 @@ For when Playwright isn't enough. Console inspection, network request analysis, 
 
 | | |
 |---|---|
-| **Author** | Anthropic |
-| **Install** | `claude mcp add chrome-devtools -s user -- npx @anthropic-ai/chrome-devtools-mcp@latest` |
+| **Author** | Google (ChromeDevTools team) |
+| **Install** | `claude mcp add chrome-devtools --scope user -- npx chrome-devtools-mcp@latest` |
+| **Source** | [ChromeDevTools/chrome-devtools-mcp](https://github.com/ChromeDevTools/chrome-devtools-mcp) |
 
 The combo:
 ```
@@ -437,7 +504,7 @@ If you use Storybook, this stops Claude from reinventing components you already 
 | | |
 |---|---|
 | **Author** | Chromatic |
-| **Install** | `claude mcp add storybook-mcp --transport http https://your-storybook-url/mcp --scope project` |
+| **Install** | `npx storybook add @storybook/addon-mcp` then `claude mcp add --transport http --scope project storybook http://localhost:6006/mcp` |
 | **Source** | [chromatic.com](https://www.chromatic.com/) |
 
 ### Visual Regression Skill
@@ -455,7 +522,7 @@ From the author of web performance at Google. Five skills that cover Core Web Vi
 | | |
 |---|---|
 | **Author** | addyosmani |
-| **Install** | `npx add-skill addyosmani/web-quality-skills` |
+| **Install** | `claude plugin marketplace add addyosmani/web-quality-skills && claude plugin install web-quality-skills@addy-web-quality-skills` (or `npx skills add addyosmani/web-quality-skills`) |
 | **Source** | [addyosmani/web-quality-skills](https://github.com/addyosmani/web-quality-skills) |
 
 ---
@@ -491,7 +558,8 @@ Web scraping as an MCP server. Scrape docs, competitor sites, design inspiration
 
 | | |
 |---|---|
-| **Docs** | [firecrawl.dev/docs](https://docs.firecrawl.dev/mcp) |
+| **Install** | `claude mcp add --transport http firecrawl https://mcp.firecrawl.dev/v2/mcp` |
+| **Docs** | [docs.firecrawl.dev/mcp-server](https://docs.firecrawl.dev/mcp-server) |
 
 ---
 
@@ -523,6 +591,7 @@ Build UI components with shadcn/ui. Part of the Stitch MCP ecosystem.
 | | |
 |---|---|
 | **Author** | Google Labs |
+| **Install** | Part of `npx skills add google-labs-code/stitch-skills` |
 
 ### TypeScript LSP
 
@@ -530,7 +599,7 @@ Real-time type checking via Language Server Protocol. Catches errors before Clau
 
 | | |
 |---|---|
-| **Install** | `claude plugin add anthropic/typescript-lsp` |
+| **Install** | `claude plugin install typescript-lsp@claude-plugins-official` (needs `npm i -g typescript-language-server typescript`) |
 
 ### Baseline UI / Accessibility / Motion+Performance
 
@@ -545,9 +614,9 @@ Three-skill pipeline. Run them in sequence after Claude generates a page:
 
 Install:
 ```bash
-npx ui-skills add baseline-ui
-npx ui-skills add fixing-accessibility
-npx ui-skills add fixing-motion-performance
+npx ui-skills get baseline-ui
+npx ui-skills get fixing-accessibility
+npx ui-skills get fixing-motion-performance
 ```
 
 Design, then craft, then a11y, then perf. That's the loop.
@@ -562,7 +631,8 @@ Manage deployments, builds, logs, domains from Claude Code. Deploy preview branc
 
 | | |
 |---|---|
-| **Source** | [claude.com/plugins](https://claude.com/plugins) |
+| **Install** | `claude mcp add --transport http vercel https://mcp.vercel.com` (then `/mcp` to sign in) or `claude plugin install vercel@claude-plugins-official` |
+| **Docs** | [vercel.com/docs/agent-resources/vercel-mcp](https://vercel.com/docs/agent-resources/vercel-mcp) |
 
 ### PinMe
 
@@ -571,37 +641,69 @@ Zero-config deploy. No servers, no accounts. Point it at a directory, get a URL.
 | | |
 |---|---|
 | **Author** | glitternetwork |
+| **Install** | `npm install -g pinme` |
 | **Source** | [glitternetwork/pinme](https://github.com/glitternetwork/pinme) |
 
 ---
 
 ## Recommended Stacks
 
-*What to install together, depending on how you work.*
+*What to install together, depending on how you work. Generated from `catalog/stacks.json`; each stack is also one command: `/frontend-design-toolkit:install <id>`.*
 
-### Essentials (every project)
+<!-- catalog:stacks:start -->
+### Essentials (`essentials`)
 
-These three cover most of what you need. Start here.
+Every project. Three tools cover most of what you need; start here.
 
 ```bash
-claude plugin add anthropic/frontend-design
-claude mcp add context7 -s user -- npx -y @upstash/context7-mcp@latest
+# Frontend Design (Official)
+claude plugin install frontend-design@claude-plugins-official
+# Context7
+claude mcp add --scope user context7 -- npx -y @upstash/context7-mcp@latest
+# Playwright MCP
 claude mcp add playwright -s user -- npx @playwright/mcp@latest
 ```
 
-### Design-First (Figma to Code)
+Or in one go: `/frontend-design-toolkit:install essentials`
 
-For teams with a designer handing off Figma files.
+### Solo Builder (`solo`)
+
+Ship fast, look good, minimal config. One app, no design system, no designer.
 
 ```bash
-claude plugin add anthropic/frontend-design
-claude mcp add context7 -s user -- npx -y @upstash/context7-mcp@latest
-claude mcp add --transport sse figma-dev-mode-mcp-server http://127.0.0.1:3845/sse
+# Frontend Design (Official)
+claude plugin install frontend-design@claude-plugins-official
+# Context7
+claude mcp add --scope user context7 -- npx -y @upstash/context7-mcp@latest
+# UI/UX Pro Max
+claude plugin marketplace add nextlevelbuilder/ui-ux-pro-max-skill
+claude plugin install ui-ux-pro-max@ui-ux-pro-max-skill
+# Playwright MCP
 claude mcp add playwright -s user -- npx @playwright/mcp@latest
-claude plugin add anthropic/typescript-lsp
+```
+
+Or in one go: `/frontend-design-toolkit:install solo`
+
+### Design-First (`design-first`)
+
+Teams with a designer handing off Figma files.
+
+```bash
+# Frontend Design (Official)
+claude plugin install frontend-design@claude-plugins-official
+# Context7
+claude mcp add --scope user context7 -- npx -y @upstash/context7-mcp@latest
+# Figma MCP Server (Official)
+claude plugin install figma@claude-plugins-official
+# Playwright MCP
+claude mcp add playwright -s user -- npx @playwright/mcp@latest
+# TypeScript LSP
+npm install -g typescript-language-server typescript
+claude plugin install typescript-lsp@claude-plugins-official
 ```
 
 Add to CLAUDE.md:
+
 ```markdown
 ## Figma Integration
 - Use get_design_context to read design structure
@@ -611,89 +713,109 @@ Add to CLAUDE.md:
 - Tokens: src/styles/tokens.css
 ```
 
-### Solo Builder (MVP speed)
+Or in one go: `/frontend-design-toolkit:install design-first`
 
-Ship fast, look good. Minimal config.
+### Full Stack (component library + design system) (`component-library`)
 
-```bash
-claude plugin add anthropic/frontend-design
-claude mcp add context7 -s user -- npx -y @upstash/context7-mcp@latest
-claude plugin add nextlevelbuilder/ui-ux-pro-max-skill
-claude mcp add playwright -s user -- npx @playwright/mcp@latest
-```
-
-### Full Stack (component library + design system)
-
-For teams that maintain their own component library.
+Teams that maintain their own component library and design system.
 
 ```bash
-# Design
-claude plugin add anthropic/frontend-design
-claude plugin add nextlevelbuilder/ui-ux-pro-max-skill
-
-# Docs + types
-claude mcp add context7 -s user -- npx -y @upstash/context7-mcp@latest
-claude plugin add anthropic/typescript-lsp
-
-# Figma
-claude mcp add --transport sse figma-dev-mode-mcp-server http://127.0.0.1:3845/sse
-
-# Testing + debugging
+# Frontend Design (Official)
+claude plugin install frontend-design@claude-plugins-official
+# UI/UX Pro Max
+claude plugin marketplace add nextlevelbuilder/ui-ux-pro-max-skill
+claude plugin install ui-ux-pro-max@ui-ux-pro-max-skill
+# Context7
+claude mcp add --scope user context7 -- npx -y @upstash/context7-mcp@latest
+# TypeScript LSP
+npm install -g typescript-language-server typescript
+claude plugin install typescript-lsp@claude-plugins-official
+# Figma MCP Server (Official)
+claude plugin install figma@claude-plugins-official
+# Playwright MCP
 claude mcp add playwright -s user -- npx @playwright/mcp@latest
-claude mcp add chrome-devtools -s user -- npx @anthropic-ai/chrome-devtools-mcp@latest
-
-# Polish pipeline
-npx ui-skills add baseline-ui
-npx ui-skills add fixing-accessibility
-npx ui-skills add fixing-motion-performance
+# Chrome DevTools MCP
+claude mcp add chrome-devtools --scope user -- npx chrome-devtools-mcp@latest
+# Storybook MCP
+npx storybook add @storybook/addon-mcp
+claude mcp add --transport http --scope project storybook http://localhost:6006/mcp
+# Baseline UI (ui-skills)
+npx ui-skills get baseline-ui
+# Fixing Accessibility (ui-skills)
+npx ui-skills get fixing-accessibility
+# Fixing Motion & Performance (ui-skills)
+npx ui-skills get fixing-motion-performance
 ```
+
+Or in one go: `/frontend-design-toolkit:install component-library`
+<!-- catalog:stacks:end -->
 
 ---
 
 ## Quick Reference
 
+*Generated from `catalog/catalog.json`.*
+
+<!-- catalog:quick-reference:start -->
 | Tool | Type | Category | Stars | Setup |
 |------|------|----------|-------|-------|
-| Frontend Design | Skill | Design | Official | One command |
-| UI/UX Pro Max | Skill | Design | 16.9k | One command |
-| Taste Skill | Skill | Design | — | One command |
-| Frontend Design Pro | Skill | Design | — | One command |
-| Bencium UX Designer | Skill | Design | — | Manual copy |
-| Design System Architect | Skill | Theming | — | Manual copy |
-| Design Tokens (phrazzld) | Skill | Theming | — | Manual copy |
-| Tailwind CSS Kit | Skill | Theming | — | One command |
-| UI Styling (ClaudeKit) | Skill | Theming | — | Manual copy |
-| CLAUDE.md Theme Block | Config | Theming | N/A | Copy-paste |
-| Create Design System Rules | Skill | Theming | — | Figma MCP needed |
-| Animation Skills (freshtechbro) | Skill | Animation | — | One command |
-| Motion Skill (jezweb) | Skill | Animation | — | Manual copy |
-| Design Motion Principles | Skill | Animation | — | Manual copy |
-| Figma MCP | MCP | Design to Code | Official | Config needed |
-| Storybook MCP | MCP | Testing | — | Config needed |
-| Playwright MCP | MCP | Testing | 20k+ | One command |
-| Chrome DevTools MCP | MCP | Debug | Official | One command |
-| Web Quality Skills (Osmani) | Skill | Perf/A11y/SEO | — | One command |
-| Visual Regression | Skill | Testing | — | Manual copy |
-| Context7 | MCP | Docs | — | One command |
-| TypeScript LSP | LSP | Types | Official | One command |
-| Vercel MCP | MCP | Deploy | — | Config needed |
-| Baseline UI | Skill | Polish | — | One command |
-| Fixing Accessibility | Skill | A11y | — | One command |
-| Fixing Motion/Perf | Skill | Perf | — | One command |
+| [Frontend Design (Official)](https://github.com/anthropics/claude-code/tree/main/plugins/frontend-design) | Plugin | Design Skills | Official | One command |
+| [UI/UX Pro Max](https://github.com/nextlevelbuilder/ui-ux-pro-max-skill) | Plugin | Design Skills | 136k | 2 commands |
+| [Taste Skill](https://github.com/Leonxlnx/taste-skill) | Plugin | Design Skills | 97k | 2 commands |
+| [Frontend Design Pro Demo](https://github.com/claudekit/frontend-design-pro-demo) | Plugin | Design Skills | 278 | 2 commands |
+| [Bencium UX Designer](https://github.com/bencium/bencium-claude-code-design-skill) | Plugin | Design Skills | — | 2 commands |
+| [Brand Guidelines Skill](https://claude.com/plugins) | Skill | Design Skills | Official | Manual |
+| [Design System Architect](https://mcp-market.vercel.app/tools/skills/design-system-architect-5) | Skill | Site-Wide Theming & Design Tokens | — | Manual |
+| [Design Tokens Skill](https://claude-plugins.dev/skills/@phrazzld/claude-config/design-tokens) | Skill | Site-Wide Theming & Design Tokens | — | Manual |
+| [Tailwind CSS Kit](https://github.com/blencorp/claude-code-kit/blob/main/cli/kits/tailwindcss/skills/tailwindcss/SKILL.md) | Skill | Site-Wide Theming & Design Tokens | — | Manual |
+| [UI Styling Skill (ClaudeKit)](https://claudecodeskills.wayjet.io/skills/claudekit/04-ui-styling/) | Skill | Site-Wide Theming & Design Tokens | — | Manual |
+| [Tailwind Styling Skill (MajesticLabs)](https://claude-plugins.dev/skills/@majesticlabs-dev/majestic-marketplace/tailwind-styling) | Skill | Site-Wide Theming & Design Tokens | — | Manual |
+| [Create Design System Rules (Figma)](https://mcpservers.org/claude-skills/figma/create-design-system-rules) | Skill | Site-Wide Theming & Design Tokens | — | Manual |
+| [CLAUDE.md Theme Block](https://platform.claude.com/cookbook/coding-prompting-for-frontend-aesthetics) | Config | Site-Wide Theming & Design Tokens | N/A | Copy-paste |
+| [Animation Design Skills (freshtechbro)](https://github.com/freshtechbro/claudedesignskills) | Collection | Animation & Motion | 1.1k | 2 commands |
+| [Motion Skill (jezweb)](https://www.skillsdirectory.com/skills/jezweb-motion) | Skill | Animation & Motion | — | Manual |
+| [Design Motion Principles](https://github.com/kylezantos/design-motion-principles) | Skill | Animation & Motion | 1.3k | One command |
+| [Wondelai UX/Growth Skills](https://github.com/wondelai/skills) | Collection | UI/UX Intelligence | 2.4k | 2 commands |
+| [Google Stitch Skills](https://github.com/google-labs-code/stitch-skills) | Collection | UI/UX Intelligence | 8.5k | One command |
+| [Jeffallan Claude Skills](https://github.com/Jeffallan/claude-skills) | Collection | UI/UX Intelligence | 11.9k | 2 commands |
+| [UI/UX Design Skill (Useforclaude)](https://claude-plugins.dev/skills/@Useforclaude/skills-claude/ui-ux-design-skill) | Skill | UI/UX Intelligence | — | Manual |
+| [Figma MCP Server (Official)](https://developers.figma.com/docs/figma-mcp-server/) | MCP | Design-to-Code Pipeline | Official | One command |
+| [Figma Code Connect](https://help.figma.com/hc/en-us/articles/23920389749655-Code-Connect) | Feature | Design-to-Code Pipeline | Official | Manual |
+| [Web Artifacts Builder](https://github.com/ComposioHQ/awesome-claude-skills) | Skill | Design-to-Code Pipeline | — | Manual |
+| [Playwright MCP](https://github.com/microsoft/playwright-mcp) | MCP | Testing & Browser Automation | — | One command |
+| [Playwright CLI + Skills](https://github.com/microsoft/playwright-cli) | CLI | Testing & Browser Automation | — | 2 commands |
+| [Chrome DevTools MCP](https://github.com/ChromeDevTools/chrome-devtools-mcp) | MCP | Testing & Browser Automation | 53k | One command |
+| [Webapp Testing Skill](https://github.com/ComposioHQ/awesome-claude-skills) | Skill | Testing & Browser Automation | — | Manual |
+| [Storybook MCP](https://storybook.js.org/docs/ai/mcp) | MCP | Testing & Browser Automation | Official | 2 commands |
+| [Visual Regression Skill](https://claude-plugins.dev/skills/@alekspetrov/navigator/visual-regression) | Skill | Testing & Browser Automation | — | Manual |
+| [Web Quality Skills (Addy Osmani)](https://github.com/addyosmani/web-quality-skills) | Plugin | Testing & Browser Automation | 3k | 2 commands |
+| [Context7](https://github.com/upstash/context7) | MCP | Docs & Context | — | One command |
+| [Skill Seekers](https://github.com/yusufkaraaslan/Skill_Seekers) | CLI | Docs & Context | 15k | One command |
+| [Firecrawl MCP](https://docs.firecrawl.dev/mcp-server) | MCP | Docs & Context | — | One command |
+| [D3.js Visualization](https://github.com/ComposioHQ/awesome-claude-skills) | Skill | Framework Skills | — | Manual |
+| [Three.js Skills](https://github.com/CloudAI-X/threejs-skills) | Collection | Framework Skills | 3.6k | Manual |
+| [shadcn/ui Skill (Google Stitch)](https://github.com/google-labs-code/stitch-skills) | Skill | Framework Skills | 8.5k | One command |
+| [TypeScript LSP](https://github.com/anthropics/claude-plugins-official) | LSP | Framework Skills | Official | 2 commands |
+| [Baseline UI (ui-skills)](https://github.com/ibelick/ui-skills) | Skill | Framework Skills | — | One command |
+| [Fixing Accessibility (ui-skills)](https://github.com/ibelick/ui-skills) | Skill | Framework Skills | — | One command |
+| [Fixing Motion & Performance (ui-skills)](https://github.com/ibelick/ui-skills) | Skill | Framework Skills | — | One command |
+| [Vercel MCP](https://vercel.com/docs/agent-resources/vercel-mcp) | MCP | Deploy & Preview | Official | One command |
+| [PinMe](https://github.com/glitternetwork/pinme) | CLI | Deploy & Preview | 3.8k | One command |
+<!-- catalog:quick-reference:end -->
 
 ### Context budget
 
-MCP servers eat tokens at session start. Keep 3-5 active max.
+MCP servers register their tool schemas at session start. Keep 3 to 5 active at most.
 
-| Server | ~Token Cost |
+| Server | ~Token cost |
 |--------|------------|
 | Playwright MCP | 5.3k |
-| Chrome DevTools | 5-6k |
-| Figma MCP | 3-4k |
-| Context7 | 2k (on-demand) |
+| Chrome DevTools MCP | 5 to 6k |
+| Figma MCP | 3 to 4k |
+| Context7 | 2k (docs fetched on demand) |
 | 5 servers total | ~55k before you type anything |
 
-Mitigate with: `/mcp disable <name>` when not in use, Tool Search (lazy loading, cuts cost up to 95%), and preferring skills over MCP servers where possible. Skills only load ~100 tokens at session start.
+Mitigate with project scoping (`--scope project`), `/mcp` to disable servers you are not using, Tool Search (lazy schema loading, up to 95% less), `@playwright/cli` instead of the Playwright MCP, and skills over MCP servers wherever both exist: a skill loads ~100 tokens at session start. The `context-budget` skill carries this advice into every session.
 
 ---
 
@@ -716,13 +838,13 @@ Mitigate with: `/mcp disable <name>` when not in use, Tool Search (lazy loading,
 
 ## Contributing
 
-Know something that should be on this list? Open a PR.
+Know something that should be on this list? Add it to `catalog/catalog.json`, run `npm run render` and `npm run check`, and open a PR. Details, including the inclusion criteria and how to change the plugin's skills, are in [CONTRIBUTING.md](CONTRIBUTING.md).
 
 To get included:
 - Has to be specifically useful for frontend/design work
 - Has to work with Claude Code
 - Has to be maintained or from a trusted source
-- High star count or official backing helps
+- Install commands must exist today (the validator rejects commands that no longer exist)
 
 ---
 
@@ -732,4 +854,4 @@ To get included:
 
 ---
 
-*[wilwaldon.com](https://wilwaldon.com) · February 2026*
+*Started by [wilwaldon.com](https://wilwaldon.com) in February 2026 as a curated list. Turned into a plugin and maintained by [Nexus Conseil](https://github.com/Nexus-Conseil).*

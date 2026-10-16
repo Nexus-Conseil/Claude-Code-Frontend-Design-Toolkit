@@ -1,0 +1,16 @@
+{
+  "$schema": "https://anthropic.com/claude-code/plugin.schema.json",
+  "name": "frontend-design-toolkit",
+  "displayName": "Frontend Design Toolkit",
+  "version": "1.0.0",
+  "description": "Better-looking frontends from Claude Code: design-direction, theming, polish and context-budget skills, a design-review agent, a project audit, and a maintained catalog of 40+ vetted design tools with one-command install.",
+  "author": {
+    "name": "Nexus Conseil",
+    "email": "contact@nexus-conseil.ch",
+    "url": "https://github.com/Nexus-Conseil"
+  },
+  "homepage": "https://github.com/Nexus-Conseil/Claude-Code-Frontend-Design-Toolkit",
+  "repository": "https://github.com/Nexus-Conseil/Claude-Code-Frontend-Design-Toolkit",
+  "license": "MIT",
+  "keywords": ["frontend", "design", "ui", "ux", "tailwind", "design-tokens", "figma", "playwright", "accessibility", "theming", "catalog"]
+}
