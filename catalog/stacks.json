@@ -1,0 +1,39 @@
+{
+  "$schema": "./schema.json#/$defs/stacksFile",
+  "stacks": [
+    {
+      "id": "essentials",
+      "name": "Essentials",
+      "for": "Every project. Three tools cover most of what you need; start here.",
+      "tools": ["frontend-design", "context7", "playwright-mcp"],
+      "claudeMd": null
+    },
+    {
+      "id": "solo",
+      "name": "Solo Builder",
+      "for": "Ship fast, look good, minimal config. One app, no design system, no designer.",
+      "tools": ["frontend-design", "context7", "ui-ux-pro-max", "playwright-mcp"],
+      "claudeMd": null
+    },
+    {
+      "id": "design-first",
+      "name": "Design-First",
+      "for": "Teams with a designer handing off Figma files.",
+      "tools": ["frontend-design", "context7", "figma-mcp", "playwright-mcp", "typescript-lsp"],
+      "claudeMd": "## Figma Integration\n- Use get_design_context to read design structure\n- Use get_variable_defs for token definitions\n- Check Code Connect mappings before creating new components\n- Components: src/components/\n- Tokens: src/styles/tokens.css\n"
+    },
+    {
+      "id": "component-library",
+      "name": "Full Stack (component library + design system)",
+      "for": "Teams that maintain their own component library and design system.",
+      "tools": [
+        "frontend-design", "ui-ux-pro-max",
+        "context7", "typescript-lsp",
+        "figma-mcp",
+        "playwright-mcp", "chrome-devtools-mcp", "storybook-mcp",
+        "baseline-ui", "fixing-accessibility", "fixing-motion-performance"
+      ],
+      "claudeMd": null
+    }
+  ]
+}

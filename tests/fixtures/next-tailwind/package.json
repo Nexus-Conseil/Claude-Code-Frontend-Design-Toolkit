@@ -1,0 +1,5 @@
+{
+  "name": "demo",
+  "dependencies": { "next": "15.0.0", "react": "19.0.0", "react-dom": "19.0.0", "motion": "12.0.0" },
+  "devDependencies": { "tailwindcss": "4.0.0", "@tailwindcss/vite": "4.0.0" }
+}

@@ -1,0 +1,16 @@
+{
+  "name": "frontend-design-toolkit",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Development tooling for the Frontend Design Toolkit Claude Code plugin (tests, validation, README generation). The plugin itself has no runtime dependencies.",
+  "type": "module",
+  "license": "MIT",
+  "engines": { "node": ">=20" },
+  "scripts": {
+    "test": "node --test \"tests/**/*.test.mjs\"",
+    "validate": "node scripts/validate.mjs",
+    "render": "node scripts/render-quick-reference.mjs",
+    "render:check": "node scripts/render-quick-reference.mjs --check",
+    "check": "npm run validate && npm run render:check && npm test"
+  }
+}

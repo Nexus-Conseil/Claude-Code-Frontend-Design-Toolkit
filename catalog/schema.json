@@ -1,0 +1,84 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/Nexus-Conseil/Claude-Code-Frontend-Design-Toolkit/catalog/schema.json",
+  "title": "Frontend Design Toolkit catalog",
+  "type": "object",
+  "required": ["version", "updated", "sections", "tools"],
+  "additionalProperties": false,
+  "properties": {
+    "$schema": { "type": "string" },
+    "version": { "type": "string", "pattern": "^\\d+\\.\\d+\\.\\d+$" },
+    "updated": { "type": "string", "format": "date", "pattern": "^\\d{4}-\\d{2}-\\d{2}$" },
+    "sections": {
+      "type": "array", "minItems": 1,
+      "items": {
+        "type": "object", "required": ["id", "title", "tagline", "blurb"], "additionalProperties": false,
+        "properties": {
+          "id": { "$ref": "#/$defs/slug" },
+          "title": { "type": "string", "minLength": 1 },
+          "tagline": { "type": "string", "minLength": 1 },
+          "blurb": { "type": "string", "minLength": 1 }
+        }
+      }
+    },
+    "tools": {
+      "type": "array", "minItems": 1,
+      "items": { "$ref": "#/$defs/tool" }
+    },
+    "resources": {
+      "type": "array",
+      "items": {
+        "type": "object", "required": ["title", "url"], "additionalProperties": false,
+        "properties": {
+          "title": { "type": "string", "minLength": 1 },
+          "url": { "$ref": "#/$defs/httpsUrl" },
+          "note": { "type": "string" }
+        }
+      }
+    }
+  },
+  "$defs": {
+    "slug": { "type": "string", "pattern": "^[a-z0-9]+(-[a-z0-9]+)*$" },
+    "httpsUrl": { "type": "string", "pattern": "^https://" },
+    "kind": { "enum": ["skill", "plugin", "mcp", "lsp", "cli", "config", "feature", "collection", "service"] },
+    "tool": {
+      "type": "object",
+      "required": ["id", "name", "section", "kind", "author", "summary", "install", "requires", "source", "docs", "stars", "tags", "notes"],
+      "additionalProperties": false,
+      "properties": {
+        "id": { "$ref": "#/$defs/slug" },
+        "name": { "type": "string", "minLength": 1 },
+        "section": { "$ref": "#/$defs/slug" },
+        "kind": { "$ref": "#/$defs/kind" },
+        "author": { "type": "string", "minLength": 1 },
+        "summary": { "type": "string", "minLength": 20, "maxLength": 400 },
+        "install": { "type": "array", "items": { "type": "string", "minLength": 1 } },
+        "requires": { "type": "array", "items": { "type": "string", "minLength": 1 } },
+        "source": { "$ref": "#/$defs/httpsUrl" },
+        "docs": { "oneOf": [{ "$ref": "#/$defs/httpsUrl" }, { "type": "null" }] },
+        "stars": { "oneOf": [{ "type": "string", "minLength": 1 }, { "type": "null" }] },
+        "tags": { "type": "array", "minItems": 1, "items": { "$ref": "#/$defs/slug" } },
+        "notes": { "type": "string" }
+      }
+    },
+    "stacksFile": {
+      "type": "object", "required": ["stacks"], "additionalProperties": false,
+      "properties": {
+        "$schema": { "type": "string" },
+        "stacks": {
+          "type": "array", "minItems": 1,
+          "items": {
+            "type": "object", "required": ["id", "name", "for", "tools", "claudeMd"], "additionalProperties": false,
+            "properties": {
+              "id": { "$ref": "#/$defs/slug" },
+              "name": { "type": "string", "minLength": 1 },
+              "for": { "type": "string", "minLength": 1 },
+              "tools": { "type": "array", "minItems": 1, "items": { "$ref": "#/$defs/slug" } },
+              "claudeMd": { "oneOf": [{ "type": "string" }, { "type": "null" }] }
+            }
+          }
+        }
+      }
+    }
+  }
+}
